@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "325158288804",
+    "project_id": "target-viral-suppression",
+    "storage_bucket": "target-viral-suppression.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325158288804:android:c42d9874bd119e95485531",
+        "android_client_info": {
+          "package_name": "com.example.tvs_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "325158288804-qm4g2obcu584v209dnpm9s1o122eqk0d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSIosu8Zw6d9ObE2ZL0gHnJ-fyWLq0LvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325158288804-qm4g2obcu584v209dnpm9s1o122eqk0d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
