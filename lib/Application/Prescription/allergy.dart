@@ -27,7 +27,7 @@ class _AllergyScreenState extends State<AllergyScreen> {
         child: TextFormField(
           controller: _allergy,
           validator: (value) {
-            return value.isNotEmpty ? null : "Enter the quantity";
+            return value.isNotEmpty ? null : "Enter the allergy";
           },
           style: TextStyle(color: Colors.black87),
           decoration: InputDecoration(

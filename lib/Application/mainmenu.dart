@@ -3,7 +3,7 @@ import 'Account/account.dart';
 import 'Chat/chatdetails.dart';
 import 'Info/infoPN.dart';
 import 'Info/infomain.dart';
-import 'Model/User.dart';
+import '../Model/User.dart';
 import 'Reminder/remindermain.dart';
 import 'record.dart';
 

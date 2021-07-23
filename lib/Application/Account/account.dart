@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tvs_application/BL/AccountBL.dart';
 import 'package:tvs_application/Model/User.dart';
 
 import '../login.dart';
@@ -15,20 +16,36 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final FirebaseAuth auth = FirebaseAuth.instance; 
   UserModel user;
+  final bl = AccountBL();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection("user")
-          .doc(auth.currentUser.uid)
-          .snapshots(),
+      stream: bl.getUserDataStream(),
       builder: (context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
         if (!snapshot.hasData) {
           return Center(
-            child: Text('Loading...'),
+            child: CircularProgressIndicator(),
           );
-        } else {
+        } else if (snapshot.hasError){
+          return Center(
+            child: Column(
+              children: [
+                Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: ${snapshot.error}'),
+                )
+                ],
+            ),
+          );
+            
+        }
+        else {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
             child: ListView(

@@ -2,7 +2,7 @@
     package="com.example.tvs_application">
    <application
         android:label="tvs_application"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/tvs_logo">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

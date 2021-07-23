@@ -566,7 +566,7 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                         children: <Widget>[
                           SizedBox(height: 20),
                           buildName(),
-                          SizedBox(height: 18),
+                          SizedBox(height: 28),
                           Container(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -577,11 +577,11 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 18),
+                          SizedBox(height: 28),
                           buildStrength(),
-                          SizedBox(height: 18),
+                          SizedBox(height: 28),
                           buildTime(),
-                          SizedBox(height: 10),
+                          SizedBox(height: 20),
                           buildTaken(),
                           SizedBox(height: 38),
                           Center(child: Text('Note: Reminder will be automatically set.')),

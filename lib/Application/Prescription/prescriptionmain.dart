@@ -78,16 +78,6 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                     Container(
                       height: double.infinity,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                            Color(0xffBDF1F6),
-                            Color(0xccBDF1F6),
-                            Color(0x99BDF1F6),
-                            Color(0x66BDF1F6),
-                          ])),
                       child: SingleChildScrollView(
                           physics: AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.symmetric(
@@ -102,6 +92,66 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                 itemBuilder: (BuildContext context, int index) {
                                   var prescription = snapshot.data.docs[index];
                                   return Dismissible(
+                                    child: Card(
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: InkWell(
+                                        child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 15, horizontal: 15),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(children: [
+                                                  Text(
+                                                      prescription[
+                                                          'med\'s name'],
+                                                      style: TextStyle(
+                                                        fontSize: 22,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      )),
+                                                ]),
+                                                Text(prescription['quantity']
+                                                        .toString() +
+                                                    ' ' +
+                                                    prescription['type'] +
+                                                    ' (' +
+                                                    prescription['strength'] +
+                                                    'mg) '),
+                                                Text('Take ' +
+                                                    prescription['taken'] +
+                                                    ' in ' +
+                                                    prescription['time']),
+                                              ],
+                                            )),
+                                        onLongPress: () {
+                                          PrescriptionModel p =
+                                              PrescriptionModel();
+                                          p.id = prescription.reference.id;
+                                          p.medname =
+                                              prescription['med\'s name'];
+                                          p.quantity = prescription['quantity'];
+                                          p.type = prescription['type'];
+                                          p.strength = prescription['strength'];
+                                          p.taken = prescription['taken'];
+                                          p.time = prescription['time'];
+
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          new PrescriptionAdd(
+                                                              false, p)));
+                                        },
+                                      ),
+                                    ),
                                     key: UniqueKey(),
                                     onDismissed:
                                         (DismissDirection direction) async {
@@ -157,66 +207,6 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                     ),
                                     background: Container(),
                                     direction: DismissDirection.endToStart,
-                                    child: Card(
-                                      elevation: 5,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: InkWell(
-                                        onLongPress: () {
-                                          PrescriptionModel p =
-                                              PrescriptionModel();
-                                          p.id = prescription.reference.id;
-                                          p.medname =
-                                              prescription['med\'s name'];
-                                          p.quantity = prescription['quantity'];
-                                          p.type = prescription['type'];
-                                          p.strength = prescription['strength'];
-                                          p.taken = prescription['taken'];
-                                          p.time = prescription['time'];
-
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder:
-                                                      (BuildContext context) =>
-                                                          new PrescriptionAdd(
-                                                              false, p)));
-                                        },
-                                        child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 15, horizontal: 15),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(children: [
-                                                  Text(
-                                                      prescription[
-                                                          'med\'s name'],
-                                                      style: TextStyle(
-                                                        fontSize: 22,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      )),
-                                                ]),
-                                                Text(prescription['quantity']
-                                                        .toString() +
-                                                    ' ' +
-                                                    prescription['type'] +
-                                                    ' (' +
-                                                    prescription['strength'] +
-                                                    'mg) '),
-                                                Text('Take ' +
-                                                    prescription['taken'] +
-                                                    ' in ' +
-                                                    prescription['time']),
-                                              ],
-                                            )),
-                                      ),
-                                    ),
                                   );
                                 },
                               ),
@@ -244,3 +234,4 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
         });
   }
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

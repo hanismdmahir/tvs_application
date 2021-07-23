@@ -1,9 +1,10 @@
 import 'dart:core';
-import 'Model/User.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../Model/User.dart';
+import '../BL/AccountBL.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'loader.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -11,18 +12,17 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterSreenState extends State<RegisterScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _refferalIdController = TextEditingController();
-  final firestore = FirebaseFirestore.instance;
   bool type1 = false;
   bool type2 = false;
   String typeSelected = "";
   UserModel u = UserModel();
- 
+  final bl = AccountBL();
+
   Widget buildEmail() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,10 +54,11 @@ class _RegisterSreenState extends State<RegisterScreen> {
               hintStyle: TextStyle(color: Colors.black38),
             ),
             validator: (value) {
-              if(value.isEmpty){
+              if (value.isEmpty) {
                 return 'Please enter your email';
-              }
-              else{
+              } else if (!value.contains('@') || !value.contains('.')) {
+                return 'Please enter a valid email address';
+              } else {
                 return null;
               }
             },
@@ -99,10 +100,11 @@ class _RegisterSreenState extends State<RegisterScreen> {
               hintStyle: TextStyle(color: Colors.black38),
             ),
             validator: (value) {
-              if(value.isEmpty){
+              if (value.isEmpty) {
                 return 'Please enter your password';
-              }
-              else{
+              } else if (value.length < 6) {
+                return 'Password should be more than 6 characters';
+              } else {
                 return null;
               }
             },
@@ -142,6 +144,13 @@ class _RegisterSreenState extends State<RegisterScreen> {
               hintText: 'Username',
               hintStyle: TextStyle(color: Colors.black38),
             ),
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter your username';
+              } else {
+                return null;
+              }
+            },
           ),
         )
       ],
@@ -175,9 +184,19 @@ class _RegisterSreenState extends State<RegisterScreen> {
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14),
               prefixIcon: Icon(Icons.person_search, color: Color(0xff0245A3)),
-              hintText: type1 == true ? 'Refferal Code' : 'Patient Navigator Code',
+              hintText:
+                  type1 == true ? 'Refferal Code' : 'Patient Navigator Code',
               hintStyle: TextStyle(color: Colors.black38),
             ),
+            validator: (value) {
+              if (value.isEmpty) {
+                return type1 == true
+                    ? 'Please enter your Refferal Code'
+                    : 'Please enter your Patient Navigator Code';
+              } else {
+                return null;
+              }
+            },
           ),
         )
       ],
@@ -193,10 +212,16 @@ class _RegisterSreenState extends State<RegisterScreen> {
           child: ElevatedButton(
             child: Text('Register'),
             onPressed: () async {
-              if(_formKey.currentState.validate()){
-                _register();
+              if (_formKey.currentState.validate()) {
+                if (typeSelected == '') {
+                  final snackBar = SnackBar(
+                    content: Text('Please Select User Type'),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else {
+                  _register();
+                }
               }
-              //Navigator.pushReplacementNamed(context, '/mainmenu');
             },
             style: ElevatedButton.styleFrom(
               primary: Color(0xff06224A),
@@ -216,127 +241,92 @@ class _RegisterSreenState extends State<RegisterScreen> {
       spacing: 5.0,
       runSpacing: 5.0,
       children: <Widget>[
-        Wrap( crossAxisAlignment: WrapCrossAlignment.center,
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('Patient'),
-              labelStyle: TextStyle(
-                  color: type1 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: typeSelected == 'Patient',
-              onSelected: (selected) {
-                setState(() {
-                  if(typeSelected != 'Patient')
-                  {
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('Patient'),
+                  labelStyle: TextStyle(
+                      color: type1 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: typeSelected == 'Patient',
+                  onSelected: (selected) {
                     setState(() {
-                      type1 = selected;
-                      type2 = !selected;
+                      if (typeSelected != 'Patient') {
+                        setState(() {
+                          type1 = selected;
+                          type2 = !selected;
+                        });
+                      }
+                      typeSelected = 'Patient';
                     });
-                  }
-                  typeSelected = 'Patient';
-                  
-                });
-              }
-          ),
-        ),
-        Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('Patient Navigator'),
-              labelStyle: TextStyle(
-                  color: type2 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: typeSelected == 'Patient Navigator',
-              onSelected: (selected) {
-                setState(() {
-                  
-                  if(typeSelected != 'Patient Navigator')
-                  {
+                  }),
+            ),
+            Container(
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('Patient Navigator'),
+                  labelStyle: TextStyle(
+                      color: type2 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: typeSelected == 'Patient Navigator',
+                  onSelected: (selected) {
                     setState(() {
-                      type2 = selected;
-                      type1 = !selected;
+                      if (typeSelected != 'Patient Navigator') {
+                        setState(() {
+                          type2 = selected;
+                          type1 = !selected;
+                        });
+                      }
+                      typeSelected = 'Patient Navigator';
                     });
-                  }
-                  typeSelected = 'Patient Navigator';
-                  
-                });
-                
-              }
-          ),
-        ),
-        ],
+                  }),
+            ),
+          ],
         )
       ],
     ));
   }
 
   Future<void> _register() async {
+    String msg;
+
+    u = new UserModel(
+        email: _emailController.text,
+        username: _usernameController.text,
+        password: _passwordController.text,
+        refferalId: _refferalIdController.text,
+        patient: typeSelected == "Patient" ? true : false);
+    LoaderDialog.showLoadingDialog(context, _formKey);
     
+    msg = await bl.register(u);
+    Navigator.of(_formKey.currentContext, rootNavigator: true).pop();
 
-    try {
-      User uc = (await 
-        _auth.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        )
-      ).user;
-      if (uc != null) {
-        setState(() {
-            u = new UserModel(email: _emailController.text, username: _usernameController.text, uid: uc.uid, refferalId: _refferalIdController.text );
-          });
-      
-          insertUserData(u);
-      
-          final snackBar = SnackBar(
-            content: Text('Successfully registered ' + u.email),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      
-          Navigator.pushReplacementNamed(context, '/login' );
-        } 
-    } on FirebaseAuthException  catch (e) {
-        if (e.code == 'email-already-in-use') {
-          final snackBar = SnackBar(
-            content: Text('The email is already in use.'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else if (e.code == 'invalid-email') {
-          final snackBar = SnackBar(
-            content: Text('The email is invalid.'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        } else if (e.code == 'weak-password') {
-          final snackBar = SnackBar(
-            content: Text('The password is weak. Please use stronger password'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }
+    final snackBar = SnackBar(
+      content: Text(msg),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    if (msg == 'Successfully registered ' + u.email) {
+      Navigator.pushReplacementNamed(context, '/login');
     }
-  
   }
-
-  Future<void> insertUserData(UserModel u) async {
-
-    await firestore.collection("user").doc(u.uid).set({
-      'email': u.email,
-      'username': u.username,
-      'code': u.refferalId,
-      'patient': typeSelected == "Patient" ? true : false
-    });
-  }
-
 
   Widget buildLogin() {
     return GestureDetector(
@@ -358,7 +348,7 @@ class _RegisterSreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: GestureDetector(
         child: Stack(
@@ -399,20 +389,23 @@ class _RegisterSreenState extends State<RegisterScreen> {
                         buildUsername(),
                         SizedBox(height: 18),
                         Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("I am a ", style: TextStyle(
-                                  color: Color(0xff0245A3),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
-                                SizedBox(width: 6),
-                                buildType(),
-                              ],
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("I am a ",
+                                  style: TextStyle(
+                                      color: Color(0xff0245A3),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(width: 6),
+                              buildType(),
+                            ],
                           ),
+                        ),
                         SizedBox(height: 18),
-                        type1 == false && type2 == false ? Container() : buildRefferal(),
+                        type1 == false && type2 == false
+                            ? Container()
+                            : buildRefferal(),
                         SizedBox(height: 20),
                         buildRegisterButton(),
                         SizedBox(height: 10),
@@ -424,7 +417,6 @@ class _RegisterSreenState extends State<RegisterScreen> {
           ],
         ),
       ),
-    )
-    );
+    ));
   }
 }

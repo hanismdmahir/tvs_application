@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../BL/AccountBL.dart';
 
-import 'Model/User.dart';
+import '../Model/User.dart';
+import 'loader.dart';
 import 'mainmenu.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,11 +12,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginSreenState extends State<LoginScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final bl = AccountBL();
 
   Widget buildEmail() {
     return Column(
@@ -131,58 +130,26 @@ class _LoginSreenState extends State<LoginScreen> {
   }
 
   void _signInWithEmailAndPassword() async {
-    try {
-      User user = (await _auth.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      )).user;
-      
-      if (user != null) {
-        // start sini amek user type
-        var doc = FirebaseFirestore.instance.collection("user").doc(user.uid);
-      
-        DocumentSnapshot<Map<String, dynamic>> value = await doc.get();
-        UserModel u = UserModel(
-            email: value['email'],
-            username: value['username'],
-            uid: user.uid,
-            refferalId: value['code'],
-            patient: value['patient']
-            );
-      
-        final snackBar = SnackBar(
-          content: Text('Successfully login ' + user.email),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      
-        Navigator.pushReplacement(
+    String msg;
+
+    msg = await bl.signIn(_emailController.text, _passwordController.text);
+
+    final snackBar = SnackBar(
+      content: Text(msg),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    
+    if(msg == 'Successfully login ' + _emailController.text)
+    {
+      LoaderDialog.showLoadingDialog(context, _formKey); 
+      UserModel u = await bl.getUserDataModel();
+      Navigator.of(_formKey.currentContext,rootNavigator: true).pop();
+      Navigator.pushReplacement(
             context,
             MaterialPageRoute(
                 builder: (BuildContext context) => new MainMenuScreen(u)));
-      } else {
-        final snackBar = SnackBar(
-          content: Text('Failed to login '),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        final snackBar = SnackBar(
-            content: Text('No user found for that email. Please try again.'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else if (e.code == 'wrong-password') {
-        final snackBar = SnackBar(
-            content: Text('Wrong password. Please try again.'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else if (e.code == 'invalid-email') {
-        final snackBar = SnackBar(
-            content: Text('The email is invalid. Please try again.'),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
     }
+
   }
 
   Widget buildRegister() {

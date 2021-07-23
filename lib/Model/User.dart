@@ -1,6 +1,7 @@
 
 class UserModel {
   String email;
+  String password;
   String username;
   String uid;
   String refferalId;
@@ -9,6 +10,7 @@ class UserModel {
   
   UserModel(
       { this.email,
+       this.password,
        this.username,
        this.uid,
        this.refferalId,

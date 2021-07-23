@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'Prescription/prescriptionmain.dart';
+import 'Record_Test/test.dart';
 
 class RecordMainScreen extends StatefulWidget {
   @override
@@ -20,7 +21,9 @@ class _RecordMainScreenState extends State<RecordMainScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             InkWell(
-              onTap: () => print('Test pressed'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => TestScreen()) );
+              },
               child: ConstrainedBox(
                 constraints: BoxConstraints.tightFor(width: 200, height: 200),
                   child: Card(
