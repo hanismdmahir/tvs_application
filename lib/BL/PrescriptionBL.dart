@@ -24,7 +24,7 @@ class PrescriptionBL {
   Future<int> updateIntake(AdherenceModel a) async {
     int success;
 
-     success = await dal.updateIntake(a);
+    success = await dal.updateIntake(a);
 
     return success;
   }
@@ -42,7 +42,6 @@ class PrescriptionBL {
 
     return snapshot;
   }
-  
 
   Future<int> addReminder(ReminderModel r) async {
     int success;

@@ -138,18 +138,16 @@ class _LoginSreenState extends State<LoginScreen> {
       content: Text(msg),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    
-    if(msg == 'Successfully login ' + _emailController.text)
-    {
-      LoaderDialog.showLoadingDialog(context, _formKey); 
-      UserModel u = await bl.getUserDataModel();
-      Navigator.of(_formKey.currentContext,rootNavigator: true).pop();
-      Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => new MainMenuScreen(u)));
-    }
 
+    if (msg == 'Successfully login ' + _emailController.text) {
+      LoaderDialog.showLoadingDialog(context, _formKey);
+      UserModel u = await bl.getUserDataModel();
+      Navigator.of(_formKey.currentContext, rootNavigator: true).pop();
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => new MainMenuScreen(u)));
+    }
   }
 
   Widget buildRegister() {

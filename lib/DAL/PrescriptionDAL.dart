@@ -9,13 +9,11 @@ class PrescriptionDAL {
   final firestore = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getIntakeStream() {
-    var snapshot =
-        FirebaseFirestore.instance
-            .collection("user")
-            .doc(_auth.currentUser.uid)
-            .collection('adherence')
-            .snapshots();
-
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .doc(_auth.currentUser.uid)
+        .collection('adherence')
+        .snapshots();
 
     return snapshot;
   }
@@ -40,7 +38,7 @@ class PrescriptionDAL {
   Future<int> updateIntake(AdherenceModel a) async {
     int success;
 
-     await firestore
+    await firestore
         .collection("user")
         .doc(_auth.currentUser.uid)
         .collection("adherence")
@@ -49,7 +47,7 @@ class PrescriptionDAL {
       'medName': a.medName,
       'taken': a.taken,
       'takenDate': a.takenDate,
-    }).whenComplete(() => success = 1); 
+    }).whenComplete(() => success = 1);
 
     return success;
   }
@@ -68,14 +66,12 @@ class PrescriptionDAL {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getListPrescription() {
-    var snapshot =
-        FirebaseFirestore.instance
-            .collection("user")
-            .doc(_auth.currentUser.uid)
-            .collection('prescription')
-            .orderBy('med\'s name',descending:false)
-            .snapshots();
-
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .doc(_auth.currentUser.uid)
+        .collection('prescription')
+        .orderBy('med\'s name', descending: false)
+        .snapshots();
 
     return snapshot;
   }
@@ -89,6 +85,7 @@ class PrescriptionDAL {
         .collection("appointment")
         .doc()
         .set({
+      'idNoti': r.idNoti,
       'type': r.type,
       'details': r.details,
       'date': r.date,
@@ -101,7 +98,7 @@ class PrescriptionDAL {
   Future<int> updateReminder(ReminderModel r) async {
     int success;
 
-     await firestore
+    await firestore
         .collection("user")
         .doc(_auth.currentUser.uid)
         .collection("appointment")
@@ -111,7 +108,7 @@ class PrescriptionDAL {
       'details': r.details,
       'date': r.date,
       'location': r.location
-    }).whenComplete(() => success = 1); 
+    }).whenComplete(() => success = 1);
 
     return success;
   }
@@ -130,16 +127,13 @@ class PrescriptionDAL {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getReminderStream() {
-    var snapshot =
-        FirebaseFirestore.instance
-            .collection("user")
-            .doc(_auth.currentUser.uid)
-            .collection('appointment')
-            .orderBy('date',descending:false)
-            .snapshots();
-
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .doc(_auth.currentUser.uid)
+        .collection('appointment')
+        .orderBy('date', descending: false)
+        .snapshots();
 
     return snapshot;
   }
-
 }

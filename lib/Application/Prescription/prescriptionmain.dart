@@ -53,7 +53,7 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                         child: Text("Allergy"),
                       ),
                     ],
-                    offset: Offset(0, 45),
+                    offset: Offset(0, 0),
                     onSelected: (value) {
                       if (value == 1) {
                         Navigator.push(

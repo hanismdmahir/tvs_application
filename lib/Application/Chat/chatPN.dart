@@ -4,16 +4,16 @@ import 'package:tvs_application/BL/AccountBL.dart';
 import 'package:tvs_application/Model/User.dart';
 import 'package:intl/intl.dart';
 
-class ChatDetailsScreen extends StatefulWidget {
+class ChatPNScreen extends StatefulWidget {
   final UserModel u;
 
-  ChatDetailsScreen({this.u});
+  ChatPNScreen({this.u});
 
   @override
-  _ChatDetailsScreenState createState() => _ChatDetailsScreenState();
+  _ChatPNScreenState createState() => _ChatPNScreenState();
 }
 
-class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
+class _ChatPNScreenState extends State<ChatPNScreen> {
   final bl = AccountBL();
   String currentId;
   String peerId;

@@ -137,34 +137,55 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold)),
                               SizedBox(height: 10),
-                               StreamBuilder(
-                                stream: FirebaseFirestore.instance
-                                        .collection("user")
-                                        .doc(auth.currentUser.uid)
-                                        .collection('prescription').where('time',isEqualTo: time[index])
-                                        .snapshots(),
-                                builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>  snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return Center(child: CircularProgressIndicator());
-                                  }
-                                  else{
-                                    return ListView.separated(
-                                      shrinkWrap: true,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                              var prescription = snapshot.data.docs[index];
-                                          return ListTile(
-                                            title: Text(prescription['med\'s name']),
-                                            subtitle: Text(prescription['quantity'].toString() +' '+prescription['type']),
-                                          );
-                                        },
-                                        separatorBuilder:
-                                            (BuildContext context, int index) =>
-                                                const Divider(thickness: 0.2, color:Colors.grey ,),
-                                        itemCount: snapshot.data.docs.length);
-                                  }
-                                }
-                              ), 
+                              StreamBuilder(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("user")
+                                      .doc(auth.currentUser.uid)
+                                      .collection('prescription')
+                                      .where('time', isEqualTo: time[index])
+                                      .snapshots(),
+                                  builder: (context,
+                                      AsyncSnapshot<
+                                              QuerySnapshot<
+                                                  Map<String, dynamic>>>
+                                          snapshot) {
+                                    if (snapshot.data == null) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (!snapshot.hasData) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (snapshot.data.docs.length == 0) {
+                                      return Center(
+                                        child: Text('There is no data.'),
+                                      );
+                                    } else {
+                                      return ListView.separated(
+                                          shrinkWrap: true,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            var prescription =
+                                                snapshot.data.docs[index];
+                                            return ListTile(
+                                              title: Text(
+                                                  prescription['med\'s name']),
+                                              subtitle: Text(
+                                                  prescription['quantity']
+                                                          .toString() +
+                                                      ' ' +
+                                                      prescription['type']),
+                                            );
+                                          },
+                                          separatorBuilder:
+                                              (BuildContext context,
+                                                      int index) =>
+                                                  const Divider(
+                                                    thickness: 0.2,
+                                                    color: Colors.grey,
+                                                  ),
+                                          itemCount: snapshot.data.docs.length);
+                                    }
+                                  }),
                             ])),
                       );
                     }),
@@ -224,16 +245,15 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                           var data = snapshot.data.docs[i];
                           Timestamp time = data['date'];
                           DateTime d = time.toDate();
-                            ReminderModel r = ReminderModel(
+                          ReminderModel r = ReminderModel(
                             id: data.reference.id,
                             details: data['details'],
                             type: data['type'],
                             location: data['location'],
                             date: d,
-                            );
-                            reminderData.add(r);
-                          
-
+                            idNoti: data['idNoti']
+                          );
+                          reminderData.add(r);
                         }
                         return ListView.builder(
                           itemCount: reminderData.length,
@@ -259,11 +279,15 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                                                 )),
                                           ]),
                                           SizedBox(height: 8),
-                                          Text('Details: '+reminderData[index].details),
+                                          Text('Details: ' +
+                                              reminderData[index].details),
                                           SizedBox(height: 8),
-                                          Text('Location: '+reminderData[index].location),
+                                          Text('Location: ' +
+                                              reminderData[index].location),
                                           SizedBox(height: 8),
-                                          Text('Date: ' + dateFormat.format(reminderData[index].date)),
+                                          Text('Date: ' +
+                                              dateFormat.format(
+                                                  reminderData[index].date)),
                                         ],
                                       )),
                                   onTap: () {
@@ -271,11 +295,15 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (BuildContext context) =>
-                                                new ReminderAddScreen(add:false, reminder: reminderData[index],)));
+                                                new ReminderAddScreen(
+                                                  add: false,
+                                                  reminder: reminderData[index],
+                                                )));
                                   },
                                 ),
                               ),
                               onDismissed: (DismissDirection direction) async {
+                                await notificationsPlugin.cancel(reminderData[index].idNoti);
                                 await bl.deleteReminder(reminderData[index]);
                               },
                               confirmDismiss:
@@ -335,6 +363,4 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
       ),
     );
   }
-
-  
 }

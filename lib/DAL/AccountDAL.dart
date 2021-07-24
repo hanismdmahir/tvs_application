@@ -6,17 +6,42 @@ class AccountDAL {
   final _auth = FirebaseAuth.instance;
   final firestore = FirebaseFirestore.instance;
 
-  Future<String> register(UserModel u) async {
+  Future<String> register(UserModel u, String pnId) async {
     User uc;
     String msg;
+    var groupChatId;
 
     try {
       uc = (await _auth.createUserWithEmailAndPassword(
         email: u.email,
         password: u.password,
-      )).user;
+      ))
+          .user;
+
+      if (u.patient) {
+        if (uc.uid.hashCode <= pnId.hashCode) {
+          groupChatId = '$uc.uid-$pnId';
+        } else {
+          groupChatId = '$pnId-$uc.uid';
+        }
+
+        await firestore
+            .collection("messages")
+            .doc(groupChatId)
+            .collection(groupChatId)
+            .doc('1')
+            .set({'test': 'test'});
+
+        await firestore
+            .collection("messages")
+            .doc(groupChatId)
+            .collection(groupChatId)
+            .doc('1')
+            .delete();
+      }
 
       await firestore.collection("user").doc(uc.uid).set({
+        'uid': uc.uid,
         'email': u.email,
         'username': u.username,
         'code': u.refferalId,
@@ -57,6 +82,25 @@ class AccountDAL {
     return msg;
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientChatStream(
+      UserModel u, String username) {
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .where('code', isEqualTo: u.refferalId)
+        .where('username', isEqualTo: username)
+        .snapshots();
+    return snapshot;
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPeerDataStream(UserModel u) {
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .where('code', isEqualTo: u.refferalId)
+        .where('patient', isEqualTo: !u.patient)
+        .snapshots();
+    return snapshot;
+  }
+
   Future<UserModel> getUserDataModel(String uid) async {
     var userDoc =
         await FirebaseFirestore.instance.collection("user").doc(uid).get();
@@ -69,6 +113,21 @@ class AccountDAL {
         patient: userDoc['patient']);
 
     return u;
+  }
+
+  Future<String> getPNID(String code) async {
+    String id;
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .where('code', isEqualTo: code)
+        .where('patient', isEqualTo: false)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      id = querySnapshot.docs.first['uid'];
+    });
+
+    return id;
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserDataStream(String uid) {
