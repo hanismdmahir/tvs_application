@@ -14,7 +14,7 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  final FirebaseAuth auth = FirebaseAuth.instance; 
+  final FirebaseAuth auth = FirebaseAuth.instance;
   UserModel user;
   final bl = AccountBL();
 
@@ -22,30 +22,29 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: bl.getUserDataStream(),
-      builder: (context, AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (snapshot.hasError){
+      builder: (context,
+          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+        if (snapshot.data == null) {
+          return Center(child: CircularProgressIndicator());
+        } else if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
           return Center(
             child: Column(
               children: [
                 Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text('Error: ${snapshot.error}'),
                 )
-                ],
+              ],
             ),
           );
-            
-        }
-        else {
+        } else {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
             child: ListView(
@@ -69,8 +68,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   onTap: () {
                     showDialog(
                         context: context,
-                        builder: (context) =>
-                            UpdateAccountScreen(data: snapshot.data['username'], type: 1));
+                        builder: (context) => UpdateAccountScreen(
+                            data: snapshot.data['username'], type: 1));
                   },
                 ),
                 ListTile(
@@ -79,8 +78,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   onTap: () {
                     showDialog(
                         context: context,
-                        builder: (context) =>
-                            UpdateAccountScreen(data: snapshot.data['email'], type: 2));
+                        builder: (context) => UpdateAccountScreen(
+                            data: snapshot.data['email'], type: 2));
                   },
                 ),
                 ListTile(
@@ -89,8 +88,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   onTap: () {
                     showDialog(
                         context: context,
-                        builder: (context) =>
-                            UpdateAccountScreen(data: snapshot.data['code'], type: 3));
+                        builder: (context) => UpdateAccountScreen(
+                            data: snapshot.data['code'], type: 3));
                   },
                 ),
                 SizedBox(height: 90),

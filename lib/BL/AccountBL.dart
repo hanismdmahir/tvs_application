@@ -21,6 +21,12 @@ class AccountBL {
     return msg;
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientListStream(
+      UserModel u) {
+    var snapshot = a.getPatientListStream(u);
+    return snapshot;
+  }
+
   Future<String> getPNID(String code) async {
 
     String id = await a.getPNID(code);
@@ -41,6 +47,12 @@ class AccountBL {
 
     return u;
   }
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getPatientChatStream(UserModel u) {
+    var snapshot = a.getPatientChatStream(u);
+
+    return snapshot;
+  }
+  
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getPeerDataStream(UserModel u) {
     var snapshot = a.getPeerDataStream(u);

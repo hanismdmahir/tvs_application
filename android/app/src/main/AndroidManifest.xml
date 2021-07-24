@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.tvs_application">
    <application
-        android:label="tvs_application"
-        android:icon="@mipmap/tvs_logo">
+        android:label="TVS"
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 
 class ChatPNScreen extends StatefulWidget {
   final UserModel u;
+  final pnId;
 
-  ChatPNScreen({this.u});
+  ChatPNScreen({this.u, this.pnId});
 
   @override
   _ChatPNScreenState createState() => _ChatPNScreenState();
@@ -46,22 +47,18 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: bl.getPeerDataStream(widget.u),
-        builder:
-            (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> peer) {
+        stream: bl.getPatientChatStream(widget.u),
+        builder: (context,
+            AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> peer) {
           if (peer.data == null) {
             return Center(child: CircularProgressIndicator());
-          } else if (peer.data.docs.length == 0) {
-            return Center(
-              child: Text('There is no data.'),
-            );
           }
           if (!peer.hasData) {
             username = '';
             return Center(child: CircularProgressIndicator());
           } else {
-            currentId = widget.u.uid;
-            peerId = peer.data.docs.single.data()['uid'];
+            currentId = widget.pnId;
+            peerId = peer.data['uid'];
             if (currentId.hashCode <= peerId.hashCode) {
               groupChatId = '$currentId-$peerId';
             } else {
@@ -70,36 +67,21 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
 
             print(groupChatId);
 
-            username = peer.data.docs.single.data()['username'];
+            username = peer.data['username'];
           }
 
           return Scaffold(
             appBar: AppBar(
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.white,
-              flexibleSpace: SafeArea(
-                child: Container(
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              username,
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w600),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                elevation: 0,
+                backgroundColor: Colors.white,
+                iconTheme: IconThemeData(
+                  color: Color(0xff06224A),
                 ),
-              ),
-            ),
+                centerTitle: true,
+                title: Text(
+                  username,
+                  style: TextStyle(color: Color(0xff06224A), fontWeight: FontWeight.bold),
+                )),
             body: Stack(
               children: <Widget>[
                 Column(
@@ -227,6 +209,7 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
               margin: EdgeInsets.only(
                   bottom: isLastMessageRight(index) ? 20.0 : 10.0, right: 10.0),
             )
+            
           ],
           mainAxisAlignment: MainAxisAlignment.end,
         );

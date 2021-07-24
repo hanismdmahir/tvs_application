@@ -246,13 +246,12 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                           Timestamp time = data['date'];
                           DateTime d = time.toDate();
                           ReminderModel r = ReminderModel(
-                            id: data.reference.id,
-                            details: data['details'],
-                            type: data['type'],
-                            location: data['location'],
-                            date: d,
-                            idNoti: data['idNoti']
-                          );
+                              id: data.reference.id,
+                              details: data['details'],
+                              type: data['type'],
+                              location: data['location'],
+                              date: d,
+                              idNoti: data['idNoti']);
                           reminderData.add(r);
                         }
                         return ListView.builder(
@@ -303,7 +302,8 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                                 ),
                               ),
                               onDismissed: (DismissDirection direction) async {
-                                await notificationsPlugin.cancel(reminderData[index].idNoti);
+                                await notificationsPlugin
+                                    .cancel(reminderData[index].idNoti);
                                 await bl.deleteReminder(reminderData[index]);
                               },
                               confirmDismiss:

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tvs_application/Model/Prescription.dart';
+import 'package:tvs_application/main.dart';
 import 'adherence.dart';
 import 'allergy.dart';
 import 'prescriptionadd.dart';
@@ -126,7 +127,7 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                                     'mg) '),
                                                 Text('Take ' +
                                                     prescription['taken'] +
-                                                    ' in ' +
+                                                    ' at ' +
                                                     prescription['time']),
                                               ],
                                             )),
@@ -141,6 +142,12 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                           p.strength = prescription['strength'];
                                           p.taken = prescription['taken'];
                                           p.time = prescription['time'];
+                                          List<String> noti = prescription['idNoti'].split('/');
+                                          List<int> n = [];
+                                          noti.forEach((element) {
+                                            n.add(int.parse(element));
+                                          });
+                                          p.idNoti = n;
 
                                           Navigator.push(
                                               context,
@@ -155,6 +162,10 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                     key: UniqueKey(),
                                     onDismissed:
                                         (DismissDirection direction) async {
+                                          List<String> noti = prescription['idNoti'].split('/');
+                                          noti.forEach((element) async {
+                                            await notificationsPlugin.cancel(int.parse(element));
+                                          });
                                       print('deleted' +
                                           prescription.reference.id);
                                       await FirebaseFirestore.instance
@@ -234,4 +245,4 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
         });
   }
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+

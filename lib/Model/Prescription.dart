@@ -1,4 +1,5 @@
 class PrescriptionModel {
+    List<int> idNoti;
     String id;
     String medname;
     int quantity;
@@ -8,6 +9,7 @@ class PrescriptionModel {
     String taken;
 
     PrescriptionModel({
+       this.idNoti,
        this.id,
        this.medname,
        this.quantity,

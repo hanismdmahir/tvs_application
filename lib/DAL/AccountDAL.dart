@@ -82,12 +82,21 @@ class AccountDAL {
     return msg;
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientChatStream(
-      UserModel u, String username) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientListStream(
+      UserModel u) {
     var snapshot = FirebaseFirestore.instance
         .collection("user")
         .where('code', isEqualTo: u.refferalId)
-        .where('username', isEqualTo: username)
+        .where('patient', isEqualTo: !u.patient)
+        .snapshots();
+    return snapshot;
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getPatientChatStream(
+      UserModel u) {
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .doc(u.uid)
         .snapshots();
     return snapshot;
   }

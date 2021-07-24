@@ -1,44 +1,51 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tvs_application/Model/Prescription.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:tvs_application/main.dart';
 
 class PrescriptionAdd extends StatefulWidget {
   PrescriptionAdd(this.add, this.prescription);
 
   final bool add;
   final PrescriptionModel prescription;
-  
-    @override
-    _PrescriptionAddScreenState createState() => _PrescriptionAddScreenState();
-  }
-  
-  
+
+  @override
+  _PrescriptionAddScreenState createState() => _PrescriptionAddScreenState();
+}
 
 class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
-  final FirebaseAuth auth = FirebaseAuth.instance; 
+  var rng = new Random();
+  final FirebaseAuth auth = FirebaseAuth.instance;
   final firestore = FirebaseFirestore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool type1 = false;
   bool type2 = false;
-  bool time1 =false, time2=false, time3=false, time4=false;
-  bool taken1 =false, taken2=false;
+  bool time1 = false, time2 = false, time3 = false, time4 = false;
+  bool taken1 = false, taken2 = false;
 
   TextEditingController _medname = TextEditingController();
   TextEditingController _quantity = TextEditingController();
   TextEditingController _strength = TextEditingController();
-  
+
   String titleName = 'Add New Prescription';
 
   String typeSelected = "";
-  String timeSelected = "";
+  List<String> timeSelected = [];
   String takenSelected = "";
+  final List<String> timeList = ['Morning', 'Noon', 'Evening', 'Night'];
+  List<int> idNoti = [];
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
-    if (widget.add == false){
+    if (widget.add == false) {
       titleName = 'Edit Prescription';
       _medname.text = widget.prescription.medname;
       _quantity.text = widget.prescription.quantity.toString();
@@ -49,17 +56,8 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
       } else {
         type2 = true;
       }
-      timeSelected = widget.prescription.time;
-      if (timeSelected == 'Morning') {
-        time1 = true;
-      } else if(timeSelected == 'Noon') {
-        time2 = true;
-      } else if(timeSelected == 'Evening') {
-        time3 = true;
-      } else{
-        time4 = true;
-      }
-      
+      timeSelected = widget.prescription.time.split(',');
+
       takenSelected = widget.prescription.taken;
       if (takenSelected == 'Before Meal') {
         taken1 = true;
@@ -93,7 +91,10 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               hintText: 'Medicine Name',
-              hintStyle: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
+              hintStyle: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         )
@@ -103,7 +104,7 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
 
   Widget buildQuantity() {
     return Expanded(
-          child: Container(
+      child: Container(
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
             color: Colors.white,
@@ -116,18 +117,21 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
         child: TextFormField(
           controller: _quantity,
           validator: (value) {
-              return value.isNotEmpty ? null : "Enter the quantity";
-            },
+            return value.isNotEmpty ? null : "Enter the quantity";
+          },
           style: TextStyle(color: Colors.black87),
           keyboardType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
           ],
           decoration: InputDecoration(
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             hintText: 'Quantity',
-            hintStyle: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
+            hintStyle: TextStyle(
+                color: Colors.black,
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -155,7 +159,10 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               hintText: 'Strength (mg)',
-              hintStyle: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
+              hintStyle: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         )
@@ -169,68 +176,96 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
       spacing: 5.0,
       runSpacing: 5.0,
       children: <Widget>[
-        Wrap( crossAxisAlignment: WrapCrossAlignment.center,
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('Capsule'),
-              labelStyle: TextStyle(
-                  color: type1 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: typeSelected == 'Capsule',
-              onSelected: (selected) {
-                setState(() {
-                  if(typeSelected != 'Capsule')
-                  {
-                    type1 = selected;
-                    type2 = !selected;
-                  }
-                  typeSelected = 'Capsule';
-                  
-                });
-              }
-          ),
-        ),
-        Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('Tablet'),
-              labelStyle: TextStyle(
-                  color: type2 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: typeSelected == 'Tablet',
-              onSelected: (selected) {
-                setState(() {
-                  
-                  if(typeSelected != 'Tablet')
-                  {
-                    type2 = selected;
-                    type1 = !selected;
-                  }
-                  typeSelected = 'Tablet';
-                  
-                });
-                
-              }
-          ),
-        ),
-        ],
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('Capsule'),
+                  labelStyle: TextStyle(
+                      color: type1 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: typeSelected == 'Capsule',
+                  onSelected: (selected) {
+                    setState(() {
+                      if (typeSelected != 'Capsule') {
+                        type1 = selected;
+                        type2 = !selected;
+                      }
+                      typeSelected = 'Capsule';
+                    });
+                  }),
+            ),
+            Container(
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('Tablet'),
+                  labelStyle: TextStyle(
+                      color: type2 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: typeSelected == 'Tablet',
+                  onSelected: (selected) {
+                    setState(() {
+                      if (typeSelected != 'Tablet') {
+                        type2 = selected;
+                        type1 = !selected;
+                      }
+                      typeSelected = 'Tablet';
+                    });
+                  }),
+            ),
+          ],
         )
       ],
     ));
   }
 
+  _buildChoiceList() {
+    List<Widget> choices = [];
+
+    timeList.forEach((item) {
+      choices.add(Container(
+        padding: const EdgeInsets.all(2.0),
+        child: ChoiceChip(
+          label: Text(item),
+          labelStyle: TextStyle(
+              color: timeSelected.contains(item) ? Colors.white : Colors.black,
+              fontSize: 14.0,
+              fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
+          ),
+          backgroundColor: Colors.white,
+          selectedColor: Color(0xff06224A),
+          selected: timeSelected.contains(item),
+          onSelected: (selected) {
+            setState(() {
+              timeSelected.contains(item)
+                  ? timeSelected.remove(item)
+                  : timeSelected.add(item);
+            });
+          },
+        ),
+      ));
+    });
+
+    return choices;
+  }
 
   Widget buildTime() {
     return Container(
@@ -238,7 +273,8 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
       spacing: 5.0,
       runSpacing: 5.0,
       children: <Widget>[
-        Wrap(
+        _buildChoiceList()
+        /* Wrap(
           children: [
             Container(
             padding: const EdgeInsets.all(2.0),
@@ -360,7 +396,7 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
           ),
         ),
         ],
-        )
+        ) */
       ],
     ));
   }
@@ -374,60 +410,56 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
         Wrap(
           children: [
             Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('Before Meal'),
-              labelStyle: TextStyle(
-                  color: taken1 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: takenSelected == 'Before Meal',
-              onSelected: (selected) {
-                setState(() {
-                  if(takenSelected != 'Before Meal')
-                  {
-                    taken1 = selected;
-                    taken2 = !selected;
-                  }
-                  takenSelected = 'Before Meal';
-                  
-                });
-              }
-          ),
-        ),
-        Container(
-            padding: const EdgeInsets.all(2.0),
-            child: ChoiceChip(
-              elevation: 3.0,
-              label: Text('After Meal'),
-              labelStyle: TextStyle(
-                  color: taken2 == true ? Colors.white : Colors.black, fontSize: 14.0, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              backgroundColor: Colors.white,
-              selectedColor: Color(0xff06224A),
-              selected: takenSelected == 'After Meal',
-              onSelected: (selected) {
-                setState(() {
-                  
-                  if(takenSelected != 'After Meal')
-                  {
-                    taken2 = selected;
-                    taken1 = !selected;
-                  }
-                  takenSelected = 'After Meal';
-                  
-                });
-                
-              }
-          ),
-        ),
-        ],
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('Before Meal'),
+                  labelStyle: TextStyle(
+                      color: taken1 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: takenSelected == 'Before Meal',
+                  onSelected: (selected) {
+                    setState(() {
+                      if (takenSelected != 'Before Meal') {
+                        taken1 = selected;
+                        taken2 = !selected;
+                      }
+                      takenSelected = 'Before Meal';
+                    });
+                  }),
+            ),
+            Container(
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceChip(
+                  elevation: 3.0,
+                  label: Text('After Meal'),
+                  labelStyle: TextStyle(
+                      color: taken2 == true ? Colors.white : Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.white,
+                  selectedColor: Color(0xff06224A),
+                  selected: takenSelected == 'After Meal',
+                  onSelected: (selected) {
+                    setState(() {
+                      if (takenSelected != 'After Meal') {
+                        taken2 = selected;
+                        taken1 = !selected;
+                      }
+                      takenSelected = 'After Meal';
+                    });
+                  }),
+            ),
+          ],
         )
       ],
     ));
@@ -442,75 +474,97 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
           child: ElevatedButton(
             child: widget.add ? Text('Add') : Text('Update'),
             onPressed: () async {
+              PrescriptionModel p = PrescriptionModel();
+
               if (widget.add) {
-                if (_medname.text  == ''){
+                if (_medname.text == '') {
                   final snackBar = SnackBar(
                     content: Text('Please fill the medicine\'s name'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                else if (_quantity.text == ''){
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else if (_quantity.text == '') {
                   final snackBar = SnackBar(
                     content: Text('Please fill the medicine\'s quantity'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                else if (typeSelected == ''){
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else if (typeSelected == '') {
                   final snackBar = SnackBar(
                     content: Text('Please select one of the Type choice'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                } 
-                else if (_strength.text == ''){
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else if (_strength.text == '') {
                   final snackBar = SnackBar(
                     content: Text('Please fill the medicine\'s strength'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                else if (timeSelected == ''){
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else if (timeSelected.length == 0) {
                   final snackBar = SnackBar(
                     content: Text('Please select one of the Time choice'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                } 
-                else if (takenSelected == ''){
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else if (takenSelected == '') {
                   final snackBar = SnackBar(
                     content: Text('Please select one of the Taken choice'),
                   );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                } 
-                else{
-                  await firestore.collection("user")
-                        .doc(auth.currentUser.uid)
-                        .collection("prescription")
-                        .doc()
-                        .set({
-                          'med\'s name': _medname.text,
-                          'quantity': int.parse(_quantity.text),
-                          'strength': _strength.text,
-                          'taken': takenSelected,
-                          'time': timeSelected,
-                          'type': typeSelected
-                        }); 
-                  
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } else {
+                  timeSelected.forEach((element) {
+                    idNoti.add(rng.nextInt(50));
+                  });
+
+                  p.medname = _medname.text;
+                  p.quantity = int.parse(_quantity.text);
+                  p.strength = _strength.text;
+                  p.time = timeSelected.join(',');
+                  p.type = typeSelected;
+
+                  await firestore
+                      .collection("user")
+                      .doc(auth.currentUser.uid)
+                      .collection("prescription")
+                      .doc()
+                      .set({
+                    'med\'s name': p.medname,
+                    'quantity': p.quantity,
+                    'strength': p.strength,
+                    'taken': takenSelected,
+                    'time': p.time,
+                    'type': p.type,
+                    'idNoti': idNoti.join('/')
+                  });
+
+                  for (var i = 0; i < idNoti.length; i++) {
+                    setMedicineNotification(p, idNoti[i], timeSelected[i]);
+                  }
+
                   Navigator.of(context).pop();
                 }
-              }
-              else {
-                await firestore.collection("user")
-                        .doc(auth.currentUser.uid)
-                        .collection("prescription")
-                        .doc(widget.prescription.id)
-                        .update({
-                          'med\'s name': _medname.text,
-                          'quantity': int.parse(_quantity.text),
-                          'strength': _strength.text,
-                          'taken': takenSelected,
-                          'time': timeSelected,
-                          'type': typeSelected
-                        }); 
-                  
-                  Navigator.of(context).pop();
+              } else {
+                p.medname = _medname.text;
+                p.quantity = int.parse(_quantity.text);
+                p.strength = _strength.text;
+                p.time = timeSelected.join(',');
+                p.type = typeSelected;
+
+                await firestore
+                    .collection("user")
+                    .doc(auth.currentUser.uid)
+                    .collection("prescription")
+                    .doc(widget.prescription.id)
+                    .update({
+                  'med\'s name': p.medname,
+                  'quantity': p.quantity,
+                  'strength': p.strength,
+                  'taken': takenSelected,
+                  'time': p.time,
+                  'type': p.type,
+                });
+
+                for (var i = 0; i < widget.prescription.idNoti.length; i++) {
+                    setMedicineNotification(p, widget.prescription.idNoti[i], timeSelected[i]);
+                  }
+
+                Navigator.of(context).pop();
               }
             },
             style: ElevatedButton.styleFrom(
@@ -527,74 +581,102 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
 
   @override
   Widget build(BuildContext context) {
-    
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            iconTheme: IconThemeData(
-              color: Color(0xff06224A), //change your color here
-            ),
-            title: Text(
-              titleName,
-              style:
-                  TextStyle(color: Color(0xff06224A), fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-          ),
-          body: Container(
-            height: double.infinity,
-            width: double.infinity,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                  Color(0xffBDF1F6),
-                  Color(0xccBDF1F6),
-                  Color(0x99BDF1F6),
-                  Color(0x66BDF1F6),
-                ])),
-            child: SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(height: 20),
-                          buildName(),
-                          SizedBox(height: 28),
-                          Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                buildQuantity(),
-                                SizedBox(width: 24),
-                                buildType(),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 28),
-                          buildStrength(),
-                          SizedBox(height: 28),
-                          buildTime(),
-                          SizedBox(height: 20),
-                          buildTaken(),
-                          SizedBox(height: 38),
-                          Center(child: Text('Note: Reminder will be automatically set.')),
-                          SizedBox(height: 10),
-                          buildAddButton()
-                        ]),
-                  )),
-            ),
-          ),
-        );
-      }
-    
-      
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Color(0xff06224A), //change your color here
+        ),
+        title: Text(
+          titleName,
+          style:
+              TextStyle(color: Color(0xff06224A), fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+              Color(0xffBDF1F6),
+              Color(0xccBDF1F6),
+              Color(0x99BDF1F6),
+              Color(0x66BDF1F6),
+            ])),
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 20),
+                      buildName(),
+                      SizedBox(height: 28),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            buildQuantity(),
+                            SizedBox(width: 24),
+                            buildType(),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 28),
+                      buildStrength(),
+                      SizedBox(height: 28),
+                      buildTime(),
+                      SizedBox(height: 20),
+                      buildTaken(),
+                      SizedBox(height: 38),
+                      Center(
+                          child: Text(
+                              'Note: Reminder will be automatically set.')),
+                      SizedBox(height: 10),
+                      buildAddButton()
+                    ]),
+              )),
+        ),
+      ),
+    );
+  }
 
-  
+  Future<void> setMedicineNotification(
+      PrescriptionModel p, int idNoti, String time) async {
+    var now = DateTime.now();
+    var notiTime;
+
+    if (time == 'Morning') {
+      notiTime = DateTime(now.year, now.month, now.day, 8);
+    } else if (time == 'Noon') {
+      notiTime = DateTime(now.year, now.month, now.day, 12);
+    } else if (time == 'Evening') {
+      notiTime = DateTime(now.year, now.month, now.day, 16);
+    } else {
+      notiTime = DateTime(now.year, now.month, now.day, 20);
+    }
+
+    print('setupNoti');
+    await notificationsPlugin.zonedSchedule(
+      idNoti,
+      p.medname,
+      'Take ' + p.quantity.toString() + p.taken,
+      tz.TZDateTime.from(notiTime, tz.local),
+      const NotificationDetails(
+          android: AndroidNotificationDetails(
+              '1', 'ReminderMedicine', 'Description')),
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidAllowWhileIdle: true,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
 }
