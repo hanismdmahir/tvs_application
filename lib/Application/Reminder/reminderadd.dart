@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tvs_application/BL/PrescriptionBL.dart';
@@ -18,6 +20,7 @@ class ReminderAddScreen extends StatefulWidget {
 }
 
 class _ReminderAddScreenState extends State<ReminderAddScreen> {
+  var rng = new Random();
   final PrescriptionBL bl = PrescriptionBL();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _type;
@@ -31,7 +34,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
   DateFormat dateFormat = DateFormat("dd-MM-yyyy");
 
   @override
-  void initState() { 
+  void initState() {
     if (!widget.add) {
       titleName = 'Edit Appointment';
       _type = widget.reminder.type;
@@ -40,7 +43,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
       selectedTime = TimeOfDay.fromDateTime(selectedDate);
       var _hour = selectedTime.hour.toString();
       var _minute = selectedTime.minute.toString();
-      _time.text = _hour.padLeft(2,'0') + ' : ' + _minute.padLeft(2,'0');
+      _time.text = _hour.padLeft(2, '0') + ' : ' + _minute.padLeft(2, '0');
       _details.text = widget.reminder.details;
       _location.text = widget.reminder.location;
     }
@@ -57,7 +60,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
         selectedTime = picked;
         var _hour = selectedTime.hour.toString();
         var _minute = selectedTime.minute.toString();
-        _time.text = _hour.padLeft(2,'0') + ' : ' + _minute.padLeft(2,'0');
+        _time.text = _hour.padLeft(2, '0') + ' : ' + _minute.padLeft(2, '0');
       });
   }
 
@@ -73,9 +76,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 6,
-                  offset: Offset(0, 2))
+                  color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
             ]),
         height: 60,
         child: TextFormField(
@@ -88,8 +89,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
           keyboardType: TextInputType.text,
           decoration: InputDecoration(
             border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             hintText: 'Appointment Time',
             hintStyle: TextStyle(
                 color: Colors.black,
@@ -127,9 +127,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 6,
-                  offset: Offset(0, 2))
+                  color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
             ]),
         height: 60,
         child: TextFormField(
@@ -142,8 +140,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
           keyboardType: TextInputType.text,
           decoration: InputDecoration(
             border: InputBorder.none,
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             hintText: 'Appointment Date',
             hintStyle: TextStyle(
                 color: Colors.black,
@@ -244,7 +241,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
               ]),
           height: 60,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal:8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: DropdownButton<String>(
               underline: SizedBox(),
               isExpanded: true,
@@ -270,9 +267,9 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
               hint: Text(
                 "Appointment Type",
                 style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.bold),
+                    color: Colors.black,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold),
               ),
               onChanged: (String value) {
                 setState(() {
@@ -295,8 +292,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
           child: ElevatedButton(
             child: widget.add ? Text('Add') : Text('Update'),
             onPressed: () async {
-              if (_formKey.currentState.validate()) {
-                
+               if (_formKey.currentState.validate()) {
                 if (_type == '') {
                   final snackBar = SnackBar(
                     content: Text('Please select one of the appointment type'),
@@ -305,30 +301,32 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
                 } else {
                   int success = 0;
                   ReminderModel r = ReminderModel();
-                  
+
                   r.type = _type;
-                  r.date = new DateTime(selectedDate.year, selectedDate.month, selectedDate.day, selectedTime.hour, selectedTime.minute);
+                  r.date = new DateTime(selectedDate.year, selectedDate.month,
+                      selectedDate.day, selectedTime.hour, selectedTime.minute);
                   r.location = _location.text;
                   r.details = _details.text;
 
                   if (widget.add) {
-                   success = await bl.addReminder(r);
+                    r.idNoti = rng.nextInt(100);
+                    success = await bl.addReminder(r);
                   } else {
                     r.id = widget.reminder.id;
-                    print('here');
-                   success = await bl.updateReminder(r);
+                    success = await bl.updateReminder(r);
                   }
 
-                  if(success == 1){
+                  if (success == 1) {
+                    setAppointmentNotification(r);
                     Navigator.of(context).pop();
-                  }else{
+                  } else {
                     final snackBar = SnackBar(
-                    content: Text('Somethin wrong.. Try again.'),
-                  );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      content: Text('Somethin wrong.. Try again.'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }
                 }
-              }
+              } 
             },
             style: ElevatedButton.styleFrom(
               primary: Color(0xff06224A),
@@ -399,12 +397,13 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
     );
   }
 
-  Future<void> setAppointmentNotification(DateTime dateTime) async {
+  Future<void> setAppointmentNotification(ReminderModel r) async {
+    print('setupNoti');
     await notificationsPlugin.zonedSchedule(
-        0,
-        'Reminder',
-        'Remember it',
-        tz.TZDateTime.from(dateTime, tz.local),
+        r.idNoti,
+        r.type,
+        r.details,
+        tz.TZDateTime.from(r.date, tz.local),
         const NotificationDetails(
             android: AndroidNotificationDetails(
                 '2', 'ReminderAppointment', 'Description')),

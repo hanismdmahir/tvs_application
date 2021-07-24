@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ReminderModel {
+  int idNoti;
   String id;
   String username;
   String type;
@@ -9,6 +10,7 @@ class ReminderModel {
   DateTime date;
 
   ReminderModel({
+    this.idNoti,
     this.username,
     this.date,
     this.details,

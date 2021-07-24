@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tvs_application/Model/User.dart';
 import '../DAL/AccountDAL.dart';
@@ -6,20 +5,27 @@ import '../DAL/AccountDAL.dart';
 class AccountBL {
   final AccountDAL a = AccountDAL();
 
-  Future<String> register(UserModel u) async {
-      String msg;
-      
-      msg = await a.register(u);
+  Future<String> register(UserModel u, String pnId) async {
+    String msg;
 
-      return msg;
+    msg = await a.register(u,pnId);
+
+    return msg;
   }
 
   Future<String> signIn(String email, String password) async {
-      String msg;
-      
-      msg = await a.signIn(email, password);
+    String msg;
 
-      return msg;
+    msg = await a.signIn(email, password);
+
+    return msg;
+  }
+
+  Future<String> getPNID(String code) async {
+
+    String id = await a.getPNID(code);
+
+    return id;
   }
 
   Future<UserModel> getUserDataModel() async {
@@ -28,6 +34,18 @@ class AccountBL {
     UserModel u = await a.getUserDataModel(id);
 
     return u;
+  }
+
+  Future<UserModel> getUserDataModelByID(String id) async {
+    UserModel u = await a.getUserDataModel(id);
+
+    return u;
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPeerDataStream(UserModel u) {
+    var snapshot = a.getPeerDataStream(u);
+
+    return snapshot;
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserDataStream() {
@@ -40,18 +58,13 @@ class AccountBL {
     return a.getUserID();
   }
 
-  
-
-  Future<int> update1UserData(String field, String updateData) async{
-    int update ;
+  Future<int> update1UserData(String field, String updateData) async {
+    int update;
 
     var id = a.getUserID();
 
-    update = await a.update1UserData(field,updateData, id);
+    update = await a.update1UserData(field, updateData, id);
 
     return update;
   }
-
-
-
 }
