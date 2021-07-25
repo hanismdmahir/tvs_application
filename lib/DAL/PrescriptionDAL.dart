@@ -136,4 +136,15 @@ class PrescriptionDAL {
 
     return snapshot;
   }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientReminderStream(String uid) {
+    var snapshot = FirebaseFirestore.instance
+        .collection("user")
+        .doc(uid)
+        .collection('appointment')
+        .orderBy('date', descending: false)
+        .snapshots();
+
+    return snapshot;
+  }
 }

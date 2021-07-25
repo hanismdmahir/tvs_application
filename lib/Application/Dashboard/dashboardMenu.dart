@@ -4,6 +4,8 @@ import 'package:tvs_application/Application/Chat/chatPN.dart';
 import 'package:tvs_application/BL/AccountBL.dart';
 import 'package:tvs_application/Model/User.dart';
 
+import 'dashboardPatient.dart';
+
 class DashboardMenuScreen extends StatefulWidget {
   final UserModel u;
 
@@ -24,6 +26,22 @@ class _DashboardMenuScreenState extends State<DashboardMenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'List Of Patients',
+          style: TextStyle(
+              color: Color(0xff06224A),
+              fontSize: 26,
+              fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+        iconTheme: IconThemeData(
+          color: Color(0xff06224A),
+        ),
+      ),
       body: GestureDetector(
         child: Stack(
           children: <Widget>[
@@ -36,18 +54,6 @@ class _DashboardMenuScreenState extends State<DashboardMenuScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Patients',
-                            style: TextStyle(
-                                color: Color(0xff06224A),
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
                       SizedBox(
                         height: 16,
                       ),
@@ -77,37 +83,52 @@ class _DashboardMenuScreenState extends State<DashboardMenuScreen> {
                                         shrinkWrap: true,
                                         itemCount: snapshot.data.docs.length,
                                         itemBuilder: (context, index) {
-                                          var data =
-                                              snapshot.data.docs[index];
+                                          var data = snapshot.data.docs[index];
                                           UserModel patient = UserModel(
-                                            username: data['username'],
-                                            email: data['username'],
-                                            uid: data['uid'],
-                                            refferalId: data['code'],
-                                            patient: data['patient']
-                                            );
-                                            patientList.add(patient);
+                                              username: data['username'],
+                                              email: data['username'],
+                                              uid: data['uid'],
+                                              refferalId: data['code'],
+                                              patient: data['patient']);
+                                          patientList.add(patient);
                                           return Card(
                                             elevation: 5,
                                             child: ListTile(
-                                              title: Text(patientList[index].username),
+                                              title: Text(
+                                                  patientList[index].username),
                                               trailing: Wrap(
                                                 spacing:
                                                     16, // space between two icons
                                                 children: <Widget>[
                                                   IconButton(
-                                                      onPressed: () {},
+                                                      onPressed: () {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    new DashboardPatientScreen(
+                                                                      u: patientList[
+                                                                          index],
+                                                                    )));
+                                                      },
                                                       icon:
                                                           Icon(Icons.insights)),
                                                   IconButton(
-                                                      onPressed: () {Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (BuildContext context) =>
-                                                                new ChatPNScreen(
-                                                                  u: patientList[index],
-                                                                  pnId: widget.u.uid,
-                                                                )));},
+                                                      onPressed: () {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    new ChatPNScreen(
+                                                                      u: patientList[
+                                                                          index],
+                                                                      pnId: widget
+                                                                          .u
+                                                                          .uid,
+                                                                    )));
+                                                      },
                                                       icon: Icon(Icons.chat)),
                                                 ],
                                               ),

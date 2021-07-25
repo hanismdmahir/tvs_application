@@ -17,63 +17,68 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("user")
-            .doc(auth.currentUser.uid)
-            .collection('prescription')
-            .snapshots(),
-        builder: (context,
-            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.white,
-                iconTheme: IconThemeData(
-                  color: Color(0xff06224A), //change your color here
-                ),
-                title: Text(
-                  'Prescription',
-                  style: TextStyle(
-                      color: Color(0xff06224A),
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-                centerTitle: true,
-                actions: [
-                  PopupMenuButton(
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 1,
-                        child: Text("Adherence"),
-                      ),
-                      PopupMenuItem(
-                        value: 2,
-                        child: Text("Allergy"),
-                      ),
-                    ],
-                    offset: Offset(0, 0),
-                    onSelected: (value) {
-                      if (value == 1) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    AdherenceMainScreen()));
-                      } else if (value == 2) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    AllergyScreen()));
-                      }
-                    },
-                  )
-                ],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: Color(0xff06224A), //change your color here
+        ),
+        title: Text(
+          'Prescription',
+          style: TextStyle(
+              color: Color(0xff06224A),
+              fontSize: 24,
+              fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 1,
+                child: Text("Adherence"),
               ),
-              body: GestureDetector(
+              PopupMenuItem(
+                value: 2,
+                child: Text("Allergy"),
+              ),
+            ],
+            offset: Offset(0, 0),
+            onSelected: (value) {
+              if (value == 1) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            AdherenceMainScreen()));
+              } else if (value == 2) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => AllergyScreen()));
+              }
+            },
+          )
+        ],
+      ),
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection("user")
+              .doc(auth.currentUser.uid)
+              .collection('prescription')
+              .snapshots(),
+          builder: (context,
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.data == null) {
+              return Center(child: CircularProgressIndicator());
+            } else if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.data.docs.length == 0) {
+              return Center(
+                child: Text('There is no data.'),
+              );
+            } else {
+              return GestureDetector(
                 child: Stack(
                   children: <Widget>[
                     Container(
@@ -131,7 +136,7 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                                     prescription['time']),
                                               ],
                                             )),
-                                        onLongPress: () {
+                                        onTap: () {
                                           PrescriptionModel p =
                                               PrescriptionModel();
                                           p.id = prescription.reference.id;
@@ -142,7 +147,8 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                           p.strength = prescription['strength'];
                                           p.taken = prescription['taken'];
                                           p.time = prescription['time'];
-                                          List<String> noti = prescription['idNoti'].split('/');
+                                          List<String> noti =
+                                              prescription['idNoti'].split('/');
                                           List<int> n = [];
                                           noti.forEach((element) {
                                             n.add(int.parse(element));
@@ -162,10 +168,12 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                                     key: UniqueKey(),
                                     onDismissed:
                                         (DismissDirection direction) async {
-                                          List<String> noti = prescription['idNoti'].split('/');
-                                          noti.forEach((element) async {
-                                            await notificationsPlugin.cancel(int.parse(element));
-                                          });
+                                      List<String> noti =
+                                          prescription['idNoti'].split('/');
+                                      noti.forEach((element) async {
+                                        await notificationsPlugin
+                                            .cancel(int.parse(element));
+                                      });
                                       print('deleted' +
                                           prescription.reference.id);
                                       await FirebaseFirestore.instance
@@ -226,23 +234,22 @@ class _PrescriptionMainScreenState extends State<PrescriptionMain> {
                     )
                   ],
                 ),
-              ),
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: Color(0xff06224A),
-                onPressed: () {
-                  PrescriptionModel p = PrescriptionModel();
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new PrescriptionAdd(true, p)));
-                },
-                child: Icon(Icons.add, color: Colors.white),
-                tooltip: 'Add New Prescription',
-              ),
-            );
-          }
-        });
+              );
+            }
+          }),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xff06224A),
+        onPressed: () {
+          PrescriptionModel p = PrescriptionModel();
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      new PrescriptionAdd(true, p)));
+        },
+        child: Icon(Icons.add, color: Colors.white),
+        tooltip: 'Add New Prescription',
+      ),
+    );
   }
 }
-

@@ -123,8 +123,14 @@ class _AllergyScreenState extends State<AllergyScreen> {
                   builder: (context,
                       AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
                           snapshot) {
-                    if (!snapshot.hasData) {
+                    if (snapshot.data == null) {
                       return Center(child: CircularProgressIndicator());
+                    } else if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.data.docs.length == 0) {
+                      return Center(
+                        child: Text('There is no data.'),
+                      );
                     } else {
                       return ListView.builder(
                           shrinkWrap: true,
