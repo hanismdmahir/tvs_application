@@ -240,19 +240,22 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
                           child: Text('There is no data.'),
                         );
                       } else {
-                        reminderData.clear();
+                        reminderData = [];
                         for (int i = 0; i < snapshot.data.docs.length; i++) {
                           var data = snapshot.data.docs[i];
                           Timestamp time = data['date'];
                           DateTime d = time.toDate();
-                          ReminderModel r = ReminderModel(
-                              id: data.reference.id,
-                              details: data['details'],
-                              type: data['type'],
-                              location: data['location'],
-                              date: d,
-                              idNoti: data['idNoti']);
-                          reminderData.add(r);
+                          print(DateTime.now().isBefore(d));
+                          if (DateTime.now().isBefore(d)) {
+                            ReminderModel r = ReminderModel(
+                                id: data.reference.id,
+                                details: data['details'],
+                                type: data['type'],
+                                location: data['location'],
+                                date: d,
+                                idNoti: data['idNoti']);
+                            reminderData.add(r);
+                          }
                         }
                         return ListView.builder(
                           itemCount: reminderData.length,

@@ -309,7 +309,7 @@ class _ReminderAddScreenState extends State<ReminderAddScreen> {
                   r.details = _details.text;
 
                   if (widget.add) {
-                    r.idNoti = rng.nextInt(50) + 50;
+                    r.idNoti = rng.nextInt(100) + 100;
                     success = await bl.addReminder(r);
                   } else {
                     r.id = widget.reminder.id;

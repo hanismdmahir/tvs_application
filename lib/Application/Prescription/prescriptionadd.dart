@@ -269,12 +269,8 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
 
   Widget buildTime() {
     return Container(
-        child: Wrap(
-      spacing: 5.0,
-      runSpacing: 5.0,
-      children: <Widget>[
-        _buildChoiceList()
-        /* Wrap(
+        child: Wrap(spacing: 5.0, runSpacing: 5.0, children: _buildChoiceList()
+            /* Wrap(
           children: [
             Container(
             padding: const EdgeInsets.all(2.0),
@@ -397,8 +393,8 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
         ),
         ],
         ) */
-      ],
-    ));
+
+            ));
   }
 
   Widget buildTaken() {
@@ -509,13 +505,14 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } else {
                   timeSelected.forEach((element) {
-                    idNoti.add(rng.nextInt(50));
+                    idNoti.add(rng.nextInt(100));
                   });
 
                   p.medname = _medname.text;
                   p.quantity = int.parse(_quantity.text);
                   p.strength = _strength.text;
                   p.time = timeSelected.join(',');
+                  p.taken = takenSelected;
                   p.type = typeSelected;
 
                   await firestore
@@ -527,7 +524,7 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                     'med\'s name': p.medname,
                     'quantity': p.quantity,
                     'strength': p.strength,
-                    'taken': takenSelected,
+                    'taken': p.taken,
                     'time': p.time,
                     'type': p.type,
                     'idNoti': idNoti.join('/')
@@ -543,6 +540,7 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                 p.medname = _medname.text;
                 p.quantity = int.parse(_quantity.text);
                 p.strength = _strength.text;
+                p.taken = takenSelected;
                 p.time = timeSelected.join(',');
                 p.type = typeSelected;
 
@@ -555,14 +553,15 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
                   'med\'s name': p.medname,
                   'quantity': p.quantity,
                   'strength': p.strength,
-                  'taken': takenSelected,
+                  'taken': p.taken,
                   'time': p.time,
                   'type': p.type,
                 });
 
                 for (var i = 0; i < widget.prescription.idNoti.length; i++) {
-                    setMedicineNotification(p, widget.prescription.idNoti[i], timeSelected[i]);
-                  }
+                  setMedicineNotification(
+                      p, widget.prescription.idNoti[i], timeSelected[i]);
+                }
 
                 Navigator.of(context).pop();
               }
@@ -664,11 +663,13 @@ class _PrescriptionAddScreenState extends State<PrescriptionAdd> {
       notiTime = DateTime(now.year, now.month, now.day, 20);
     }
 
-    print('setupNoti');
+    String desc =
+        'Take ' + p.quantity.toString() + ' ' + p.type + ' ' + p.taken;
+
     await notificationsPlugin.zonedSchedule(
       idNoti,
       p.medname,
-      'Take ' + p.quantity.toString() + p.taken,
+      desc,
       tz.TZDateTime.from(notiTime, tz.local),
       const NotificationDetails(
           android: AndroidNotificationDetails(

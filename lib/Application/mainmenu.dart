@@ -29,12 +29,16 @@ class _MainMenuSreenState extends State<MainMenuScreen> {
     _patient = [
       RecordMainScreen(),
       ReminderMainScreen(),
-      ChatDetailsScreen(u:widget.user),
+      ChatDetailsScreen(u: widget.user),
       ListInfoScreen(),
       AccountScreen()
     ];
 
-    _pN = [DashboardMenuScreen(u:widget.user), ListInfoPNScreen(), AccountScreen()];
+    _pN = [
+      DashboardMenuScreen(u: widget.user),
+      ListInfoPNScreen(),
+      AccountScreen()
+    ];
     super.initState();
   }
 
@@ -64,8 +68,7 @@ class _MainMenuSreenState extends State<MainMenuScreen> {
               ]
             : [
                 BottomNavigationBarItem(
-                    label: 'Patients',
-                    icon: new Icon(Icons.groups_outlined)),
+                    label: 'Patients', icon: new Icon(Icons.group_outlined)),
                 BottomNavigationBarItem(
                     label: 'Info', icon: new Icon(Icons.info_outline_rounded)),
                 BottomNavigationBarItem(

@@ -72,4 +72,10 @@ class PrescriptionBL {
 
     return snapshot;
   }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getPatientReminderStream(String uid) {
+    var snapshot = dal.getPatientReminderStream(uid);
+
+    return snapshot;
+  }
 }
