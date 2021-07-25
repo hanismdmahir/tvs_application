@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:page_view_indicators/circle_page_indicator.dart';
 import 'package:tvs_application/Application/Reminder/reminderadd.dart';
 import 'package:tvs_application/BL/PrescriptionBL.dart';
+import 'package:tvs_application/Model/Prescription.dart';
 import 'package:tvs_application/Model/Reminder.dart';
 import 'package:tvs_application/main.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,10 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
   DateFormat dateFormat = DateFormat("dd-MM-yyyy HH:mm");
   final _pageController = PageController();
   final _currentPageNotifier = ValueNotifier<int>(0);
+  List<PrescriptionModel> Morning = [];
+  List<PrescriptionModel> Noon = [];
+  List<PrescriptionModel> Evening = [];
+  List<PrescriptionModel> Night = [];
 
   @override
   void initState() {
@@ -121,73 +126,247 @@ class _ReminderMainScreenState extends State<ReminderMainScreen> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(children: [
-                ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 4,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: EdgeInsets.only(bottom: 25.0),
-                        elevation: 0.5,
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(children: [
-                              Text(time[index].toUpperCase(),
-                                  style: TextStyle(
-                                      color: Color(0xff0245A3),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 10),
-                              StreamBuilder(
-                                  stream: FirebaseFirestore.instance
-                                      .collection("user")
-                                      .doc(auth.currentUser.uid)
-                                      .collection('prescription')
-                                      .where('time', isEqualTo: time[index])
-                                      .snapshots(),
-                                  builder: (context,
-                                      AsyncSnapshot<
-                                              QuerySnapshot<
-                                                  Map<String, dynamic>>>
-                                          snapshot) {
-                                    if (snapshot.data == null) {
-                                      return Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (!snapshot.hasData) {
-                                      return Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.data.docs.length == 0) {
-                                      return Center(
-                                        child: Text('There is no data.'),
-                                      );
-                                    } else {
-                                      return ListView.separated(
-                                          shrinkWrap: true,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            var prescription =
-                                                snapshot.data.docs[index];
-                                            return ListTile(
-                                              title: Text(
-                                                  prescription['med\'s name']),
-                                              subtitle: Text(
-                                                  prescription['quantity']
+                StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection("user")
+                        .doc(auth.currentUser.uid)
+                        .collection('prescription')
+                        .snapshots(),
+                    builder: (context,
+                        AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                            snapshot) {
+                      if (snapshot.data == null) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.data.docs.length == 0) {
+                        return Center(
+                          child: Text('There is no data.'),
+                        );
+                      } else {
+                        Morning.clear();
+                        Noon.clear();
+                        Evening.clear();
+                        Night.clear();
+
+                        for (var i = 0; i < snapshot.data.docs.length; i++) {
+                          var data = snapshot.data.docs[i];
+                          PrescriptionModel p = PrescriptionModel(
+                              medname: data['med\'s name'],
+                              quantity: data['quantity'],
+                              type: data['type'],
+                              time: data['time'],
+                              taken: data['taken']);
+
+                          if (p.time.contains(',')) {
+                            List<String> ptime = p.time.split(',');
+
+                            for (var i = 0; i < ptime.length; i++) {
+                              if (ptime[i] == 'Morning') {
+                                Morning.add(p);
+                              } else if (ptime[i] == 'Noon') {
+                                Noon.add(p);
+                              } else if (ptime[i] == 'Evening') {
+                                Evening.add(p);
+                              } else {
+                                Night.add(p);
+                              }
+                            }
+                          } else {
+                            if (p.time == 'Morning') {
+                              Morning.add(p);
+                            } else if (p.time == 'Noon') {
+                              Noon.add(p);
+                            } else if (p.time == 'Evening') {
+                              Evening.add(p);
+                            } else {
+                              Night.add(p);
+                            }
+                          }
+                        }
+
+                        return ListView(
+                          shrinkWrap: true,
+                          children: [
+                            Morning.length != 0
+                                ? Card(
+                                    margin: EdgeInsets.only(bottom: 25.0),
+                                    elevation: 1,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(children: [
+                                          Text(time[0].toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Color(0xff0245A3),
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 10),
+                                          ListView.separated(
+                                              shrinkWrap: true,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return ListTile(
+                                                  title: Text(
+                                                      Morning[index].medname),
+                                                  subtitle: Text(Morning[index]
+                                                          .quantity
                                                           .toString() +
                                                       ' ' +
-                                                      prescription['type']),
-                                            );
-                                          },
-                                          separatorBuilder:
-                                              (BuildContext context,
-                                                      int index) =>
-                                                  const Divider(
-                                                    thickness: 0.2,
-                                                    color: Colors.grey,
-                                                  ),
-                                          itemCount: snapshot.data.docs.length);
-                                    }
-                                  }),
-                            ])),
-                      );
+                                                      Morning[index].type +
+                                                      ' ' +
+                                                      Morning[index].taken),
+                                                );
+                                              },
+                                              separatorBuilder:
+                                                  (BuildContext context,
+                                                          int index) =>
+                                                      const Divider(
+                                                        thickness: 0.2,
+                                                        color: Colors.grey,
+                                                      ),
+                                              itemCount: Morning.length)
+                                        ])),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Noon.length != 0
+                                ? Card(
+                                    margin: EdgeInsets.only(bottom: 25.0),
+                                    elevation: 1,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(children: [
+                                          Text(time[1].toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Color(0xff0245A3),
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 10),
+                                          ListView.separated(
+                                              shrinkWrap: true,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return ListTile(
+                                                  title:
+                                                      Text(Noon[index].medname),
+                                                  subtitle: Text(Noon[index]
+                                                          .quantity
+                                                          .toString() +
+                                                      ' ' +
+                                                      Noon[index].type +
+                                                      ' ' +
+                                                      Noon[index].taken),
+                                                );
+                                              },
+                                              separatorBuilder:
+                                                  (BuildContext context,
+                                                          int index) =>
+                                                      const Divider(
+                                                        thickness: 0.2,
+                                                        color: Colors.grey,
+                                                      ),
+                                              itemCount: Noon.length)
+                                        ])),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Evening.length != 0
+                                ? Card(
+                                    margin: EdgeInsets.only(bottom: 25.0),
+                                    elevation: 1,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(children: [
+                                          Text(time[2].toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Color(0xff0245A3),
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 10),
+                                          ListView.separated(
+                                              shrinkWrap: true,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return ListTile(
+                                                  title: Text(
+                                                      Evening[index].medname),
+                                                  subtitle: Text(Evening[index]
+                                                          .quantity
+                                                          .toString() +
+                                                      ' ' +
+                                                      Evening[index].type +
+                                                      ' ' +
+                                                      Evening[index].taken),
+                                                );
+                                              },
+                                              separatorBuilder:
+                                                  (BuildContext context,
+                                                          int index) =>
+                                                      const Divider(
+                                                        thickness: 0.2,
+                                                        color: Colors.grey,
+                                                      ),
+                                              itemCount: Evening.length)
+                                        ])),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Night.length != 0
+                                ? Card(
+                                    margin: EdgeInsets.only(bottom: 25.0),
+                                    elevation: 1,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(children: [
+                                          Text(time[3].toUpperCase(),
+                                              style: TextStyle(
+                                                  color: Color(0xff0245A3),
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 10),
+                                          ListView.separated(
+                                              shrinkWrap: true,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return ListTile(
+                                                  title: Text(
+                                                      Night[index].medname),
+                                                  subtitle: Text(Night[index]
+                                                          .quantity
+                                                          .toString() +
+                                                      ' ' +
+                                                      Night[index].type +
+                                                      ' ' +
+                                                      Night[index].taken),
+                                                );
+                                              },
+                                              separatorBuilder:
+                                                  (BuildContext context,
+                                                          int index) =>
+                                                      const Divider(
+                                                        thickness: 0.2,
+                                                        color: Colors.grey,
+                                                      ),
+                                              itemCount: Night.length)
+                                        ])),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 16,
+                            ),
+                          ],
+                        );
+                      }
                     }),
               ]),
             ),
