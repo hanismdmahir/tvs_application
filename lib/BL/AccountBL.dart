@@ -79,4 +79,12 @@ class AccountBL {
 
     return update;
   }
+
+  Future<int> updatePNCode(String oldCode, String updateData) async {
+    int update;
+
+    update = await a.updatePNCode(oldCode, updateData);
+
+    return update;
+  }
 }

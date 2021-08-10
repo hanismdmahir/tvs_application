@@ -69,7 +69,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     showDialog(
                         context: context,
                         builder: (context) => UpdateAccountScreen(
-                            data: snapshot.data['username'], type: 1));
+                            data: snapshot.data['username'], type: 1, patient: snapshot.data['patient']));
                   },
                 ),
                 ListTile(
@@ -79,7 +79,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     showDialog(
                         context: context,
                         builder: (context) => UpdateAccountScreen(
-                            data: snapshot.data['email'], type: 2));
+                            data: snapshot.data['email'], type: 2, patient: snapshot.data['patient']));
                   },
                 ),
                 ListTile(
@@ -89,7 +89,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     showDialog(
                         context: context,
                         builder: (context) => UpdateAccountScreen(
-                            data: snapshot.data['code'], type: 3));
+                            data: snapshot.data['code'], type: 3, patient: snapshot.data['patient']));
                   },
                 ),
                 SizedBox(height: 90),
