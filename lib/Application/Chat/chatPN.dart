@@ -65,8 +65,6 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
               groupChatId = '$peerId-$currentId';
             }
 
-            print(groupChatId);
-
             username = peer.data['username'];
           }
 
@@ -80,7 +78,8 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
                 centerTitle: true,
                 title: Text(
                   username,
-                  style: TextStyle(color: Color(0xff06224A), fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Color(0xff06224A), fontWeight: FontWeight.bold),
                 )),
             body: Stack(
               children: <Widget>[
@@ -209,7 +208,6 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
               margin: EdgeInsets.only(
                   bottom: isLastMessageRight(index) ? 20.0 : 10.0, right: 10.0),
             )
-            
           ],
           mainAxisAlignment: MainAxisAlignment.end,
         );
@@ -276,6 +274,7 @@ class _ChatPNScreenState extends State<ChatPNScreen> {
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
+                  listMessage = [];
                   listMessage.addAll(snapshot.data.docs);
                   return ListView.builder(
                     padding: EdgeInsets.all(10.0),

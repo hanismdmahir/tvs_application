@@ -293,6 +293,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
+                  listMessage = [];
                   listMessage.addAll(snapshot.data.docs);
                   return ListView.builder(
                     padding: EdgeInsets.all(10.0),
