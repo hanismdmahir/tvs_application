@@ -24,18 +24,9 @@ Future<void> initializeSetting() async {
 }
 
 class MyApp extends StatelessWidget {
-  // UserModel user = UserModel();
-
   @override
   Widget build(BuildContext context) {
-    //user.patient = true;
-
     return MaterialApp(
-      /*   home: ReminderMainScreen(),
-      theme: ThemeData(
-        primaryColor: Color(0xff06224A),
-      ),  */
-
       initialRoute: '/login',
       routes: {
         '/': (context) => LoginScreen(),

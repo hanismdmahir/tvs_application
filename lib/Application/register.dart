@@ -318,19 +318,17 @@ class _RegisterSreenState extends State<RegisterScreen> {
 
     pnId = await bl.getPNID(u.refferalId);
 
-    if(pnId == '' && typeSelected == "Patient") //error not pn registered
+    if (pnId == '' && typeSelected == "Patient") //error not pn registered
     {
-      msg = 'There is no Patient Navigator with Code : '+ u.refferalId;
-    }
-    else if(pnId != '' && typeSelected != "Patient") // pn register
+      msg = 'There is no Patient Navigator with Code : ' + u.refferalId;
+    } else if (pnId != '' && typeSelected != "Patient") // pn register
     {
-      msg = 'There is already a Patient Navigator with Code : '+ u.refferalId;
-    }
-    else{
+      msg = 'There is already a Patient Navigator with Code : ' + u.refferalId;
+    } else {
       msg = await bl.register(u, pnId);
-      Navigator.of(_formKey.currentContext, rootNavigator: true).pop();
     }
 
+    Navigator.of(_formKey.currentContext, rootNavigator: true).pop();
     final snackBar = SnackBar(
       content: Text(msg),
     );
@@ -433,6 +431,3 @@ class _RegisterSreenState extends State<RegisterScreen> {
     ));
   }
 }
-
-  
-
