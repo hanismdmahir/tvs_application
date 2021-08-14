@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import 'package:page_view_indicators/circle_page_indicator.dart';
 import 'package:tvs_application/Application/Reminder/reminderadd.dart';
 import 'package:tvs_application/BL/PrescriptionBL.dart';

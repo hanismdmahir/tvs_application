@@ -6,10 +6,15 @@ import 'package:tvs_application/BL/AccountBL.dart';
 import '../loader.dart';
 
 class UpdateAccountScreen extends StatefulWidget {
+  final bool patient;
   final String data;
   final int type;
 
-  UpdateAccountScreen({Key key, @required this.data, @required this.type})
+  UpdateAccountScreen(
+      {Key key,
+      @required this.data,
+      @required this.type,
+      @required this.patient})
       : super(key: key);
 
   @override
@@ -52,7 +57,10 @@ class _UpdateAccountScreenState extends State<UpdateAccountScreen> {
                   int update = 0;
 
                   LoaderDialog.showLoadingDialog(context, _formKey);
-                  if (widget.type == 2) {
+                  if (widget.type == 3 && widget.patient == false) {
+                    update = await bl.updatePNCode(widget.data, _change.text);
+                    print(update);
+                  } else if (widget.type == 2) {
                     var user = auth.currentUser;
                     var authCredentials = EmailAuthProvider.credential(
                         email: widget.data, password: _pass.text);
@@ -68,9 +76,9 @@ class _UpdateAccountScreenState extends State<UpdateAccountScreen> {
                           .doc(auth.currentUser.uid)
                           .update({
                         'email': _change.text,
-                      });
+                      }).whenComplete(() => update == 1);
 
-                      Navigator.of(context).pop();
+                      //Navigator.of(context).pop();
                     } else {
                       setState(() {
                         passGood = false;

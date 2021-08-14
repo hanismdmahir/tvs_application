@@ -94,10 +94,8 @@ class AccountDAL {
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> getPatientChatStream(
       UserModel u) {
-    var snapshot = FirebaseFirestore.instance
-        .collection("user")
-        .doc(u.uid)
-        .snapshots();
+    var snapshot =
+        FirebaseFirestore.instance.collection("user").doc(u.uid).snapshots();
     return snapshot;
   }
 
@@ -157,6 +155,34 @@ class AccountDAL {
     await firestore.collection("user").doc(uid).update({
       field: updateData,
     }).whenComplete(() => update = 1);
+
+    return update;
+  }
+
+  Future<int> updatePNCode(String oldCode, String updateData) async {
+    int update;
+    List<String> ids = [];
+
+    var users = firestore.collection('user');
+
+    await users.where('code', isEqualTo: oldCode).get().then((value) {
+      for (var i = 0; i < value.size; i++) {
+        var id = value.docs[i].id;
+        print(id);
+        ids.add(id);
+      }
+    });
+
+    print('sebelum masuk for ' + ids.length.toString());
+
+    for (var i = 0; i < ids.length; i++) {
+      print('masuk for' + i.toString());
+      await firestore.collection("user").doc(ids[i]).update({
+        'code': updateData,
+      }).whenComplete(() => update = 1);
+
+      print(ids[i] + " : " + updateData);
+    }
 
     return update;
   }

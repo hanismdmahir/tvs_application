@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:tvs_application/BL/PrescriptionBL.dart';
 import 'package:tvs_application/Model/Reminder.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:tvs_application/main.dart';
 

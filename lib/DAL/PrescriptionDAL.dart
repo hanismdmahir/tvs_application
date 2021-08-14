@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tvs_application/Model/Adherence.dart';
-import 'package:tvs_application/Model/Prescription.dart';
 import 'package:tvs_application/Model/Reminder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
